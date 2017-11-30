@@ -1,0 +1,26 @@
+{
+  "name": "iperette-backend",
+  "version": "1.0.0",
+  "description": "nodejs backend for the iPerette app",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laperette/iperette-backend.git"
+  },
+  "author": "Alex & Axel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/laperette/iperette-backend/issues"
+  },
+  "homepage": "https://github.com/laperette/iperette-backend#readme",
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  },
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
