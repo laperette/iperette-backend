@@ -1,5 +1,7 @@
 var mongoose = require('mongoose')
 var uniqueValidator = require('mongoose-unique-validator')
+var crypto = require('crypto')
+var jwt = require('jsonwebtoken')
 
 var UserSchema = new mongoose.Schema({
   firstname: {
@@ -18,6 +20,11 @@ var UserSchema = new mongoose.Schema({
     match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
     index: false
   },
+  role: {
+    type: String,
+    enum: ['ADMIN', 'USER'],
+    default: 'USER'
+  },
   email: {
     type: String,
     lowercase: true,
@@ -27,8 +34,6 @@ var UserSchema = new mongoose.Schema({
     index: true
   },
   color: String,
-  bio: String,
-  image: String,
   bookings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Booking'
@@ -52,6 +57,46 @@ UserSchema.pre('save', function (next) {
   this.color = color
   next()
 })
+
+UserSchema.methods.validPassword = function (password) {
+  var hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex')
+  return this.hash === hash
+}
+
+UserSchema.methods.setPassword = function (password) {
+  this.salt = crypto.randomBytes(16).toString('hex')
+  this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex')
+}
+
+UserSchema.methods.generateJWT = function () {
+  var today = new Date()
+  var exp = new Date(today)
+  exp.setDate(today.getDate() + 60)
+  return jwt.sign({
+    id: this._id,
+    firstname: this.firstname,
+    role: this.role,
+    exp: parseInt(exp.getTime() / 1000)
+  }, process.env.SECRET)
+}
+
+UserSchema.methods.toAuthJSON = function () {
+  return {
+    firstname: this.firstname,
+    lastname: this.lastname,
+    email: this.email,
+    color: this.color,
+    token: this.generateJWT()
+  }
+}
+
+UserSchema.methods.toProfileJSONFor = function (user) {
+  return {
+    firstname: this.firstname,
+    lastname: this.lastname,
+    color: this.color
+  }
+}
 
 mongoose.model('User', UserSchema)
 module.exports = mongoose.model('User')

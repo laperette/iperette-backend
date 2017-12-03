@@ -4,7 +4,7 @@ var bodyParser = require('body-parser')
 router.use(bodyParser.urlencoded({ extended: true }))
 var Booking = require('./Booking')
 
-// CREATES A NEW BOOKING
+// CREATES A NEW BOOKING  
 router.post('/', function (req, res) {
   Booking.create({
     start: req.body.start,
