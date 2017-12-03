@@ -2,9 +2,9 @@
   "name": "iperette-backend",
   "version": "1.0.0",
   "description": "nodejs backend for the iPerette app",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "nodemon src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,6 +21,11 @@
     "nodemon": "^1.12.1"
   },
   "dependencies": {
-    "express": "^4.16.2"
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "moment": "^2.19.3",
+    "mongoose": "^4.13.6",
+    "mongoose-unique-validator": "^1.0.6",
+    "mysql": "^2.15.0"
   }
 }
