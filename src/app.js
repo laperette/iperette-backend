@@ -11,4 +11,9 @@ var db = require('./db') // connect to db
 var UserController = require('./user/UserController')
 app.use('/users', UserController)
 
+var BookingController = require('./booking/BookingController')
+app.use('/bookings', BookingController)
+
 module.exports = app
+
+
