@@ -25,8 +25,8 @@ var BookingSchema = new mongoose.Schema({
     ref: 'User'
   }
 }, {
-  timestamps: true
-})
+    timestamps: true
+  })
 
 BookingSchema.plugin(uniqueValidator, {
   message: 'is already taken'
@@ -44,14 +44,14 @@ BookingSchema.pre('save', function (next) {
         $lte: this.end
       }
     },
-      {
-        'end': {
-          $gte: this.start,
-          $lte: this.end
-        }
+    {
+      'end': {
+        $gte: this.start,
+        $lte: this.end
       }
+    }
     ]
-  }, {'_id': 1}).exec((err, bookings) => {
+  }, { '_id': 1 }).exec((err, bookings) => {
     if (bookings.length > 0) {
       next(new Error('booking dates are in conflict with other bookings you have'))
     } else {
@@ -73,3 +73,4 @@ BookingSchema.methods.toJSONFor = function (user) {
 }
 
 mongoose.model('Booking', BookingSchema)
+module.exports = mongoose.model('Booking')

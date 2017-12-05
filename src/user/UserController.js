@@ -8,20 +8,45 @@ var auth = require('../auth')
 // CREATES A NEW USER
 router.post('/', auth.optional, function (req, res) {
   User.create({
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    email: req.body.email,
-    password: req.body.password
+    firstname: req.body.user.firstname,
+    lastname: req.body.user.lastname,
+    email: req.body.user.email
   },
     function (err, user) {
-      if (err) return res.status(500).send('There was a problem adding the information to the database.')
-      res.status(200).send(user)
+      if (err) {
+        if (err.name == "ValidatorError") return res.status(400).send(err)
+        return res.status(500).send(err)
+      }
+      /* set hash and salt in database */
+      user.setPassword(req.body.user.password)
+      /* get json representation of the user, with the jWT in it */
+      let jsonUser = user.toAuthJSON()
+      res.status(200).send(jsonUser)
     })
 })
 
+// LOGIN a USER
+router.post('/login', auth.optional, function (req, res) {
+  if (!req.body.user) return res.status(400).send('no user')
+  User.find({ email: req.body.user.email }).then(
+    user => {
+      console.log(user)
+      if (user.length > 0 && user[0].validPassword(req.body.user.password)) {
+        res.send(user[0].toAuthJSON())
+      } else {
+        res.sendStatus(401)
+      }
+    }, err => {
+      res.status(500).send(err)
+    }
+  ).catch(err => {
+    console.log(err)
+    res.status(500).send(err)
+  })
+})
 // RETURNS ALL THE USERS IN THE DATABASE
-router.get('/', auth.required, function (req, res) {
-  if (req.user.role != 'ADMIN') return res.sendStatus(401)
+router.get('/', auth.optional, function (req, res) {
+  if (req.user && req.user.role != 'ADMIN') return res.sendStatus(401)
   User.find({}, function (err, users) {
     if (err) return res.status(500).send('There was a problem finding the users.')
     res.status(200).send(users)
@@ -47,7 +72,7 @@ router.delete('/:id', auth.required, function (req, res) {
 
 // UPDATES A SINGLE USER IN THE DATABASE
 router.put('/:id', auth.required, function (req, res) {
-  User.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
+  User.findByIdAndUpdate(req.params.id, req.body, { new: true }, function (err, user) {
     if (err) return res.status(500).send('There was a problem updating the user.')
     res.status(200).send(user)
   })

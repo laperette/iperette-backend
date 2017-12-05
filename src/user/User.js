@@ -1,3 +1,4 @@
+
 var mongoose = require('mongoose')
 var uniqueValidator = require('mongoose-unique-validator')
 var crypto = require('crypto')
@@ -41,8 +42,8 @@ var UserSchema = new mongoose.Schema({
   hash: String,
   salt: String
 }, {
-  timestamps: true
-})
+    timestamps: true
+  })
 
 UserSchema.plugin(uniqueValidator, {
   message: 'is already taken.'
@@ -55,10 +56,12 @@ UserSchema.pre('save', function (next) {
     color += letters[Math.floor(Math.random() * 16)]
   }
   this.color = color
+  console.log(this)
   next()
 })
 
 UserSchema.methods.validPassword = function (password) {
+  console.log(this.salt)
   var hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex')
   return this.hash === hash
 }
