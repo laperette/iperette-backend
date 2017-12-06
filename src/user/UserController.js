@@ -1,7 +1,9 @@
 var express = require('express')
 var router = express.Router()
 var bodyParser = require('body-parser')
-router.use(bodyParser.urlencoded({ extended: true }))
+router.use(bodyParser.urlencoded({
+  extended: true
+}))
 var User = require('./User')
 var auth = require('../auth')
 
@@ -10,11 +12,12 @@ router.post('/', auth.optional, function (req, res) {
   User.create({
     firstname: req.body.user.firstname,
     lastname: req.body.user.lastname,
-    email: req.body.user.email
+    email: req.body.user.email,
+    phone: req.body.user.phone ? req.body.user.phone : ''
   },
     function (err, user) {
       if (err) {
-        if (err.name == "ValidatorError") return res.status(400).send(err)
+        if (err.name == 'ValidationError') return res.status(400).send('Un compte existe déjà à cette adresse')
         return res.status(500).send(err)
       }
       /* set hash and salt in database */
@@ -28,13 +31,15 @@ router.post('/', auth.optional, function (req, res) {
 // LOGIN a USER
 router.post('/login', auth.optional, function (req, res) {
   if (!req.body.user) return res.status(400).send('no user')
-  User.find({ email: req.body.user.email }).then(
+  User.find({
+    email: req.body.user.email
+  }).then(
     user => {
       console.log(user)
       if (user.length > 0 && user[0].validPassword(req.body.user.password)) {
         res.send(user[0].toAuthJSON())
       } else {
-        res.sendStatus(401)
+        res.status(401).send('Mot de passe erroné')
       }
     }, err => {
       res.status(500).send(err)
@@ -44,6 +49,7 @@ router.post('/login', auth.optional, function (req, res) {
     res.status(500).send(err)
   })
 })
+
 // RETURNS ALL THE USERS IN THE DATABASE
 router.get('/', auth.optional, function (req, res) {
   if (req.user && req.user.role != 'ADMIN') return res.sendStatus(401)
@@ -72,7 +78,9 @@ router.delete('/:id', auth.required, function (req, res) {
 
 // UPDATES A SINGLE USER IN THE DATABASE
 router.put('/:id', auth.required, function (req, res) {
-  User.findByIdAndUpdate(req.params.id, req.body, { new: true }, function (err, user) {
+  User.findByIdAndUpdate(req.params.id, req.body, {
+    new: true
+  }, function (err, user) {
     if (err) return res.status(500).send('There was a problem updating the user.')
     res.status(200).send(user)
   })
