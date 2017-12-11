@@ -1,4 +1,3 @@
-
 var mongoose = require('mongoose')
 var uniqueValidator = require('mongoose-unique-validator')
 var crypto = require('crypto')
@@ -42,8 +41,8 @@ var UserSchema = new mongoose.Schema({
   hash: String,
   salt: String
 }, {
-    timestamps: true
-  })
+  timestamps: true
+})
 
 UserSchema.plugin(uniqueValidator, {
   message: 'is already taken.'

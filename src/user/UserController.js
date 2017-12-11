@@ -17,11 +17,14 @@ router.post('/', auth.optional, function (req, res) {
   },
     function (err, user) {
       if (err) {
+        console.log(err)
         if (err.name == 'ValidationError') return res.status(400).send('Un compte existe déjà à cette adresse')
         return res.status(500).send(err)
       }
       /* set hash and salt in database */
       user.setPassword(req.body.user.password)
+      console.log('user salt : ', user.salt)
+      user.save()
       /* get json representation of the user, with the jWT in it */
       let jsonUser = user.toAuthJSON()
       res.status(200).send(jsonUser)
@@ -53,10 +56,12 @@ router.post('/login', auth.optional, function (req, res) {
 // RETURNS ALL THE USERS IN THE DATABASE
 router.get('/', auth.optional, function (req, res) {
   if (req.user && req.user.role != 'ADMIN') return res.sendStatus(401)
-  User.find({}, function (err, users) {
-    if (err) return res.status(500).send('There was a problem finding the users.')
-    res.status(200).send(users)
-  })
+  User.find({}).then(
+    users => {
+      res.status(200).send(users)
+    }, err => {
+      return res.status(500).send('There was a problem finding the users.')
+    })
 })
 
 // GETS A SINGLE USER FROM THE DATABASE
