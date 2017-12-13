@@ -1,11 +1,11 @@
-var express = require('express')
-var router = express.Router()
-var bodyParser = require('body-parser')
+const express = require('express')
+let router = express.Router()
+const bodyParser = require('body-parser')
 router.use(bodyParser.urlencoded({
   extended: true
 }))
-var User = require('./User')
-var auth = require('../auth')
+let User = require('./User')
+const auth = require('../auth')
 
 // CREATES A NEW USER
 router.post('/', auth.optional, function (req, res) {
@@ -14,13 +14,8 @@ router.post('/', auth.optional, function (req, res) {
     lastname: req.body.user.lastname,
     email: req.body.user.email,
     phone: req.body.user.phone ? req.body.user.phone : ''
-  },
-    function (err, user) {
-      if (err) {
-        console.log(err)
-        if (err.name == 'ValidationError') return res.status(400).send('Un compte existe déjà à cette adresse')
-        return res.status(500).send(err)
-      }
+  }).then(
+    user => {
       /* set hash and salt in database */
       user.setPassword(req.body.user.password)
       console.log('user salt : ', user.salt)
@@ -28,6 +23,11 @@ router.post('/', auth.optional, function (req, res) {
       /* get json representation of the user, with the jWT in it */
       let jsonUser = user.toAuthJSON()
       res.status(200).send(jsonUser)
+    },
+    err => {
+      console.log(err)
+      if (err.name == 'ValidationError') return res.status(400).send('Un compte existe déjà à cette adresse')
+      return res.status(500).send(err)
     })
 })
 
@@ -58,7 +58,12 @@ router.get('/', auth.optional, function (req, res) {
   if (req.user && req.user.role != 'ADMIN') return res.sendStatus(401)
   User.find({}).then(
     users => {
-      res.status(200).send(users)
+      let authJsonUsers = []
+      users.forEach(usr => {
+        authJsonUsers.push(usr.toAuthJSON())
+      })
+      console.log(authJsonUsers)
+      res.status(200).send(authJsonUsers)
     }, err => {
       return res.status(500).send('There was a problem finding the users.')
     })

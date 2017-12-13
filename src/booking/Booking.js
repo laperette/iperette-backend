@@ -22,11 +22,12 @@ var BookingSchema = new mongoose.Schema({
   },
   booker: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: [true, "can't be blank"]
   }
 }, {
-    timestamps: true
-  })
+  timestamps: true
+})
 
 BookingSchema.plugin(uniqueValidator, {
   message: 'is already taken'
@@ -44,12 +45,12 @@ BookingSchema.pre('save', function (next) {
         $lte: this.end
       }
     },
-    {
-      'end': {
-        $gte: this.start,
-        $lte: this.end
+      {
+        'end': {
+          $gte: this.start,
+          $lte: this.end
+        }
       }
-    }
     ]
   }, { '_id': 1 }).exec((err, bookings) => {
     if (bookings.length > 0) {
