@@ -59,3 +59,6 @@ typings/
 
 # visual studio
 .settings
+
+# Google credentials
+laperette-03d5032bf09c.json
