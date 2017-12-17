@@ -11,33 +11,37 @@ const auth = require('../auth')
 
 // CREATES A NEW BOOKING  
 router.post('/', auth.required, function (req, res) {
+  if (!req.body.booking) {return res.status(400).send('no booking found in the body')}
   Booking.create({
-    start: req.body.start,
-    end: req.body.end,
-    numOfParticipants: req.body.numOfParticipants,
+    start: req.body.booking.start,
+    end: req.body.booking.end,
+    numOfParticipants: req.body.booking.numOfParticipants,
     booker: req.user.id
   }).then(booking => {
-    User.update(
-      { _id: booking.booker },
-      { $push: { bookings: booking._id } }
-    ).then(user => {
-      console.log(modif)
+    User.update({
+      _id: booking.booker
+    }, {
+      $push: {
+        bookings: booking._id
+      }
+    }).then(user => {
+      console.log('booker modified :', user)
       res.status(200).send(booking)
     }, err => {
-      console.log(err)
-      return res.status(500).send('There was a problem adding the information to the database.')
+      console.log('ERROR updating the user', err)
+      return res.status(500).send('There was a problem updating the booking array of the booker')
     })
   }, err => {
-    console.log(err)
-    return res.status(500).send('There was a problem adding the information to the database.')
+    console.log('ERROR creating the booking', err)
+    return res.status(500).send('There was a problem adding the booking to the database.')
   })
 })
 
 // RETURNS ALL THE BOOKINGS IN THE DATABASE
-router.get('/', function (req, res) {
+router.get('/', auth.required, function (req, res) {
   Booking.find({}, function (err, bookings) {
     if (err) return res.status(500).send('There was a problem finding the bookings.')
-    res.status(200).send(bookings)
+    res.status(200).send({bookings})
   })
 })
 
