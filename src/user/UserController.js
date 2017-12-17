@@ -55,12 +55,12 @@ router.post('/login', auth.optional, function (req, res) {
 
 // RETURNS ALL THE USERS IN THE DATABASE
 router.get('/', auth.required, function (req, res) {
-  if (req.user && req.user.role != 'ADMIN') return res.sendStatus(401)
+  if (req.user && req.user.role != 'ADMIN') return res.status(401).send('only admin users')
   User.find({}).populate('bookings').then(
     users => {
       let authJsonUsers = []
       users.forEach(usr => {
-        authJsonUsers.push(usr.toAuthJSON())
+        authJsonUsers.push(usr.toProfileJSONFor())
       })
       console.log(authJsonUsers)
       res.status(200).send(authJsonUsers)
