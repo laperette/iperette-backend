@@ -96,7 +96,8 @@ UserSchema.methods.toProfileJSONFor = function (user) {
   return {
     firstname: this.firstname,
     lastname: this.lastname,
-    color: this.color
+    color: this.color,
+    bookings: this.bookings
   }
 }
 

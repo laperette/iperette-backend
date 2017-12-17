@@ -11,7 +11,9 @@ const auth = require('../auth')
 
 // CREATES A NEW BOOKING  
 router.post('/', auth.required, function (req, res) {
-  if (!req.body.booking) {return res.status(400).send('no booking found in the body')}
+  if (!req.body.booking) {
+    return res.status(400).send('no booking found in the body')
+  }
   Booking.create({
     start: req.body.booking.start,
     end: req.body.booking.end,
@@ -39,10 +41,14 @@ router.post('/', auth.required, function (req, res) {
 
 // RETURNS ALL THE BOOKINGS IN THE DATABASE
 router.get('/', auth.required, function (req, res) {
-  Booking.find({}, function (err, bookings) {
-    if (err) return res.status(500).send('There was a problem finding the bookings.')
-    res.status(200).send({bookings})
-  })
+  Booking.find({}).populate('booker').then(
+    bookings => {
+      res.status(200).send({
+      bookings})
+    }, err => {
+      res.status(500).send('There was a problem finding the bookings.')
+    }
+  )
 })
 
 // GETS A SINGLE BOOKING FROM THE DATABASE

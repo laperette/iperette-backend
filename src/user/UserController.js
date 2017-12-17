@@ -54,9 +54,9 @@ router.post('/login', auth.optional, function (req, res) {
 })
 
 // RETURNS ALL THE USERS IN THE DATABASE
-router.get('/', auth.optional, function (req, res) {
+router.get('/', auth.required, function (req, res) {
   if (req.user && req.user.role != 'ADMIN') return res.sendStatus(401)
-  User.find({}).then(
+  User.find({}).populate('bookings').then(
     users => {
       let authJsonUsers = []
       users.forEach(usr => {
