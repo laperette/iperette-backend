@@ -41,10 +41,9 @@ router.post('/', auth.required, function (req, res) {
 
 // RETURNS ALL THE BOOKINGS IN THE DATABASE
 router.get('/', auth.required, function (req, res) {
-  Booking.find({}).populate('booker').then(
+  Booking.find({}).populate('booker', 'color firstname lastname').then(
     bookings => {
-      res.status(200).send({
-      bookings})
+      res.status(200).send({bookings})
     }, err => {
       res.status(500).send('There was a problem finding the bookings.')
     }
