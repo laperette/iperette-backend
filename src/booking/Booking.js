@@ -17,6 +17,8 @@ var BookingSchema = new mongoose.Schema({
     default: true
   },
   numOfParticipants: {
+    min: 1,
+    max: 50,
     type: Number,
     required: [true, "can't be blank"]
   },
@@ -38,7 +40,6 @@ BookingSchema.pre('save', function (next) {
     next(new Error('start must be before the end'))
   }
   mongoose.model('Booking').find({
-    'booker': this.booker,
     $or: [{
       'start': {
         $gte: this.start,
@@ -52,13 +53,17 @@ BookingSchema.pre('save', function (next) {
         }
       }
     ]
-  }, { '_id': 1 }).exec((err, bookings) => {
-    if (bookings.length > 0) {
-      next(new Error('booking dates are in conflict with other bookings you have'))
-    } else {
-      next()
-    }
-  })
+  }, { '_id': 1 })
+    .then(bookings => {
+      if (bookings.length > 0) {
+        next(new Error('booking dates are in conflict with other bookings you have'))
+      } else {
+        next()
+      }
+    })
+    .catch(reason => {
+      next(new Error('error verifying the validity of the booking'))
+    })
 })
 
 BookingSchema.methods.toJSONFor = function (user) {

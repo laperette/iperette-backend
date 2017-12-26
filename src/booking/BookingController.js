@@ -76,4 +76,5 @@ router.put('/:id', function (req, res) {
     res.status(200).send(booking)
   })
 })
+
 module.exports = router

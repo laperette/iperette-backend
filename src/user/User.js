@@ -7,6 +7,7 @@ var UserSchema = new mongoose.Schema({
   firstname: {
     type: String,
     lowercase: true,
+    trim: true,
     unique: false,
     required: [true, "can't be blank"],
     match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
@@ -15,6 +16,7 @@ var UserSchema = new mongoose.Schema({
   lastname: {
     type: String,
     lowercase: true,
+    trim: true,
     unique: false,
     required: [true, "can't be blank"],
     match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
@@ -22,6 +24,7 @@ var UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    trim: true,
     enum: ['ADMIN', 'USER'],
     default: 'USER'
   },
@@ -31,9 +34,10 @@ var UserSchema = new mongoose.Schema({
     unique: true,
     required: [true, "can't be blank"],
     match: [/\S+@\S+\.\S+/, 'is invalid'],
+    trim: true,
     index: true
   },
-  color: String,
+  color: {type: String,trim: true},
   bookings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Booking'
