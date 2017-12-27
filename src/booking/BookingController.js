@@ -34,8 +34,8 @@ router.post('/', auth.required, function (req, res) {
       return res.status(500).send('There was a problem updating the booking array of the booker')
     })
   }, err => {
-    console.log('ERROR creating the booking', err)
-    return res.status(500).send('There was a problem adding the booking to the database.')
+    console.log(err.message)
+    return res.status(400).send(err.message)
   })
 })
 

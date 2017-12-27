@@ -53,10 +53,12 @@ BookingSchema.pre('save', function (next) {
         }
       }
     ]
-  }, { '_id': 1 })
+  }, { '_id': 1 }).populate('booker', 'firstname lastname')
     .then(bookings => {
       if (bookings.length > 0) {
-        next(new Error('booking dates are in conflict with other bookings you have'))
+        let booker = bookings[0].booker
+        let msg = bookings[0].booker.firstname + ' ' + bookings[0].booker.lastname + ' a déjà reservé à ces dates'
+        next(new Error(msg))
       } else {
         next()
       }
